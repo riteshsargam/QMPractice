@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using QMPractice.API.Data;
+using QMPractice.API.Modesls.Domain;
 using QMPractice.API.Modesls.DTO;
 
 namespace QMPractice.API.Controllers
@@ -63,5 +64,83 @@ namespace QMPractice.API.Controllers
 
             return Ok(regionDomain);
         }
+
+        [HttpPost]
+        public IActionResult Create([FromBody] AddRegionRequestDto addRegionRequestDto)
+        {
+            //Convert DTO to Domain Model
+            var regionDomainModel = new Region
+            {
+                Code = addRegionRequestDto.Code,
+                Name = addRegionRequestDto.Name,
+                RegionImageUrl = addRegionRequestDto.RegionImageUrl
+            };
+
+            //Save to Database
+            dbContext.Regions.Add(regionDomainModel);
+            dbContext.SaveChanges();
+
+            //Convert Domain Model to DTO
+            var regionDto = new RegionDto
+            {
+                Code = regionDomainModel.Code,
+                Name = regionDomainModel.Name,
+                RegionImageUrl = regionDomainModel.RegionImageUrl
+            };
+            return CreatedAtAction(nameof(GetById), new { id = regionDomainModel.Id }, regionDto);
+        }
+
+        [HttpPut]
+        [Route("{id:guid}")]
+        public IActionResult Update([FromRoute] Guid id, [FromBody] UpdateRegionRequestDto updateRegionRequestDto)
+        {
+            //Get Region from Database
+            var regionDomainModel = dbContext.Regions.FirstOrDefault(x => x.Id == id);
+            if (regionDomainModel == null)
+            {
+                return NotFound();
+            }
+            //Update Region Domain Model
+            regionDomainModel.Code = updateRegionRequestDto.Code;
+            regionDomainModel.Name = updateRegionRequestDto.Name;
+            regionDomainModel.RegionImageUrl = updateRegionRequestDto.RegionImageUrl;
+            //Save Changes to Database
+            dbContext.SaveChanges();
+            //Convert Domain Model to DTO
+            var regionDto = new RegionDto
+            {
+                Id = regionDomainModel.Id,
+                Code = regionDomainModel.Code,
+                Name = regionDomainModel.Name,
+                RegionImageUrl = regionDomainModel.RegionImageUrl
+            };
+            return Ok(regionDto);
+        }
+
+        [HttpDelete]
+        [Route("{id:guid}")]
+        public IActionResult Delete([FromRoute] Guid id)
+        {
+            //Get Region from Database
+            var regionDomainModel = dbContext.Regions.FirstOrDefault(x => x.Id == id);
+            if (regionDomainModel == null)
+            {
+                return NotFound();
+            }
+
+            //Delete Region
+            dbContext.Regions.Remove(regionDomainModel);
+            dbContext.SaveChanges();
+            //Convert Domain Model to DTO
+            var regionDto = new RegionDto
+            {
+                Id = regionDomainModel.Id,
+                Code = regionDomainModel.Code,
+                Name = regionDomainModel.Name,
+                RegionImageUrl = regionDomainModel.RegionImageUrl
+            };
+            return Ok(regionDto);
+        }
+
     }
 }
