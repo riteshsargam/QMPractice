@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using QMPractice.API.Data;
 using QMPractice.API.Modesls.Domain;
 using QMPractice.API.Modesls.DTO;
@@ -17,11 +18,11 @@ namespace QMPractice.API.Controllers
             this.dbContext = dbContext;
         }
 
-        [HttpGet]
-        public IActionResult GetAll()
+        [HttpGet] 
+        public async Task<IActionResult> GetAll()
         {
             // Get Data from Database - Domain Models
-            var regionsDomain = dbContext.Regions.ToList();
+            var regionsDomain = await dbContext.Regions.ToListAsync();
 
             //Map Domain Models to DTOs
             var regionDtos = new List<RegionDto>(); 
@@ -45,9 +46,9 @@ namespace QMPractice.API.Controllers
         //Get Region by Id
         [HttpGet]
         [Route("{id:guid}")]
-        public IActionResult GetById([FromRoute] Guid id)
+        public async Task<IActionResult> GetById([FromRoute] Guid id)
         {
-            var regionDomain = dbContext.Regions.FirstOrDefault(x => x.Id == id);
+            var regionDomain = await dbContext.Regions.FirstOrDefaultAsync(x => x.Id == id);
             if (regionDomain == null)
             {
                 return NotFound();
@@ -66,7 +67,7 @@ namespace QMPractice.API.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create([FromBody] AddRegionRequestDto addRegionRequestDto)
+        public async Task<IActionResult> Create([FromBody] AddRegionRequestDto addRegionRequestDto)
         {
             //Convert DTO to Domain Model
             var regionDomainModel = new Region
@@ -77,8 +78,8 @@ namespace QMPractice.API.Controllers
             };
 
             //Save to Database
-            dbContext.Regions.Add(regionDomainModel);
-            dbContext.SaveChanges();
+            await dbContext.Regions.AddAsync(regionDomainModel);
+            dbContext.SaveChangesAsync();
 
             //Convert Domain Model to DTO
             var regionDto = new RegionDto
@@ -92,10 +93,10 @@ namespace QMPractice.API.Controllers
 
         [HttpPut]
         [Route("{id:guid}")]
-        public IActionResult Update([FromRoute] Guid id, [FromBody] UpdateRegionRequestDto updateRegionRequestDto)
+        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateRegionRequestDto updateRegionRequestDto)
         {
             //Get Region from Database
-            var regionDomainModel = dbContext.Regions.FirstOrDefault(x => x.Id == id);
+            var regionDomainModel = await dbContext.Regions.FirstOrDefaultAsync(x => x.Id == id);
             if (regionDomainModel == null)
             {
                 return NotFound();
@@ -105,7 +106,7 @@ namespace QMPractice.API.Controllers
             regionDomainModel.Name = updateRegionRequestDto.Name;
             regionDomainModel.RegionImageUrl = updateRegionRequestDto.RegionImageUrl;
             //Save Changes to Database
-            dbContext.SaveChanges();
+            dbContext.SaveChangesAsync();
             //Convert Domain Model to DTO
             var regionDto = new RegionDto
             {
@@ -119,10 +120,10 @@ namespace QMPractice.API.Controllers
 
         [HttpDelete]
         [Route("{id:guid}")]
-        public IActionResult Delete([FromRoute] Guid id)
+        public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
             //Get Region from Database
-            var regionDomainModel = dbContext.Regions.FirstOrDefault(x => x.Id == id);
+            var regionDomainModel = await dbContext.Regions.FirstOrDefaultAsync(x => x.Id == id);
             if (regionDomainModel == null)
             {
                 return NotFound();
@@ -130,7 +131,8 @@ namespace QMPractice.API.Controllers
 
             //Delete Region
             dbContext.Regions.Remove(regionDomainModel);
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync();
+
             //Convert Domain Model to DTO
             var regionDto = new RegionDto
             {
@@ -141,6 +143,5 @@ namespace QMPractice.API.Controllers
             };
             return Ok(regionDto);
         }
-
     }
 }
