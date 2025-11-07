@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using QMPractice.API.Data;
+using QMPractice.API.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +15,9 @@ builder.Services.AddDbContext<NZWalksDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("NZWalksConnectionString"));
 });
+
+builder.Services.AddScoped<IRegionRepository, SQLRegionRepository>();
+
 
 var app = builder.Build();
 

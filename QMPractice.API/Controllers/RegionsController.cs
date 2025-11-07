@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using QMPractice.API.Data;
 using QMPractice.API.Modesls.Domain;
 using QMPractice.API.Modesls.DTO;
+using QMPractice.API.Repositories;
 
 namespace QMPractice.API.Controllers
 {
@@ -12,17 +13,19 @@ namespace QMPractice.API.Controllers
     public class RegionsController : ControllerBase
     {
         private readonly NZWalksDbContext dbContext;
+        private readonly IRegionRepository regionRepository;
 
-        public RegionsController(NZWalksDbContext dbContext)
+        public RegionsController(NZWalksDbContext dbContext, IRegionRepository regionRepository)
         {
             this.dbContext = dbContext;
+            this.regionRepository = regionRepository;
         }
 
         [HttpGet] 
         public async Task<IActionResult> GetAll()
         {
             // Get Data from Database - Domain Models
-            var regionsDomain = await dbContext.Regions.ToListAsync();
+            var regionsDomain = await regionRepository.GetAllAsync();
 
             //Map Domain Models to DTOs
             var regionDtos = new List<RegionDto>(); 
